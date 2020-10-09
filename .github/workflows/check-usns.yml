@@ -44,5 +44,5 @@ jobs:
       with:
         repos: paketo-buildpacks/stacks
         token: ${{ secrets.CORE_DEPS_CI_BOT_GITHUB_TOKEN }}
-        event: new-usn
+        event: new-tiny-usn
         payload: '{}'
