@@ -33,10 +33,10 @@ jobs:
       run: |
         docker login -u ${{ secrets.CORE_DEPS_DOCKER_USER }} -p ${{ secrets.CORE_DEPS_DOCKER_PASS }}
 
-        run_base_sha="$(skopeo inspect docker://coredeps/run-test:"${TAG}"-tiny | jq .Digest -r)"
-        run_cnb_sha="$(skopeo inspect docker://coredeps/run-test:"${TAG}"-tiny-cnb | jq .Digest -r)"
+        run_base_sha="$(skopeo inspect docker://coredeps/run-rc:"${TAG}"-tiny | jq .Digest -r)"
+        run_cnb_sha="$(skopeo inspect docker://coredeps/run-rc:"${TAG}"-tiny-cnb | jq .Digest -r)"
         build_base_sha="$(skopeo inspect docker://${{ env.BUILD_BASE_IMAGE_TAG }} | jq .Digest -r)"
-        build_cnb_sha="$(skopeo inspect docker://coredeps/build-test:"${TAG}"-tiny-cnb | jq .Digest -r)"
+        build_cnb_sha="$(skopeo inspect docker://coredeps/build-rc:"${TAG}"-tiny-cnb | jq .Digest -r)"
 
         echo "::set-output name=run_base_sha::${run_base_sha}"
         echo "::set-output name=run_cnb_sha::${run_cnb_sha}"
