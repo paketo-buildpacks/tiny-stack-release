@@ -65,9 +65,9 @@ jobs:
       with:
         build_base_image: "paketobuildpacks/build@${{ steps.image-refs.outputs.build_base_sha }}"
         build_base_image_tag: "paketobuildpacks/build:${{ env.BUILD_BASE_IMAGE_TAG }}"
-        build_cnb_image: "coredeps/build-test@${{ steps.image-refs.outputs.build_cnb_sha }}"
-        run_cnb_image: "coredeps/run-test@${{ steps.image-refs.outputs.run_cnb_sha }}"
-        run_base_image: "coredeps/run-test@${{ steps.image-refs.outputs.run_base_sha }}"
+        build_cnb_image: "coredeps/build-rc@${{ steps.image-refs.outputs.build_cnb_sha }}"
+        run_cnb_image: "coredeps/run-rc@${{ steps.image-refs.outputs.run_cnb_sha }}"
+        run_base_image: "coredeps/run-rc@${{ steps.image-refs.outputs.run_base_sha }}"
         build_receipt_diff: ${{ steps.receipt.outputs.build_diff }}
         run_receipt_diff: ${{ steps.receipt.outputs.run_diff }}
         relevant_usns: usns
