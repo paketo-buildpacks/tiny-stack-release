@@ -116,5 +116,5 @@ jobs:
         payload: |
           {
             "tag": "${{ steps.publish.outputs.version }}",
-            "build_base_image_tag": "${{ env.BUILD_BASE_IMAGE_TAG }}"
+            "build_base_image_tag": "${BUILD_BASE_IMAGE_TAG}"
           }
