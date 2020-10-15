@@ -100,10 +100,16 @@ jobs:
         bumped_version="$( echo $version | cut -d . -f 1-2)".$bumped_patch
         echo "::set-output name=version::${bumped_version}"
 
+        sudo skopeo copy "docker://${RUN_CNB_IMAGE}" "docker://gcr.io/cf-buildpacks-releng/run-test:tiny-cnb"
         sudo skopeo copy "docker://${RUN_CNB_IMAGE}" "docker://gcr.io/cf-buildpacks-releng/run-test:$bumped_version-tiny-cnb"
 
+        sudo skopeo copy "docker://${RUN_BASE_IMAGE}" "docker://index.docker.io/coredeps/run-rc:tiny"
         sudo skopeo copy "docker://${RUN_BASE_IMAGE}" "docker://index.docker.io/coredeps/run-rc:$bumped_version-tiny"
+
+        sudo skopeo copy "docker://${RUN_CNB_IMAGE}" "docker://index.docker.io/coredeps/run-rc:tiny-cnb"
         sudo skopeo copy "docker://${RUN_CNB_IMAGE}" "docker://index.docker.io/coredeps/run-rc:$bumped_version-tiny-cnb"
+
+        sudo skopeo copy "docker://${BUILD_CNB_IMAGE}" "docker://index.docker.io/coredeps/build-rc:tiny-cnb"
         sudo skopeo copy "docker://${BUILD_CNB_IMAGE}" "docker://index.docker.io/coredeps/build-rc:$bumped_version-tiny-cnb"
 
     - name: Trigger Release
