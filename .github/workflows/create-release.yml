@@ -23,8 +23,8 @@ jobs:
     - name: Set Env Vars
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          echo ::set-env name=TAG::${{ github.event.inputs.TAG }}
-          echo ::set-env name=BUILD_BASE_IMAGE_TAG::${{ github.event.inputs.BUILD_BASE_IMAGE_TAG }}
+          echo "TAG=${{ github.event.inputs.TAG }}" >> $GITHUB_ENV
+          echo "BUILD_BASE_IMAGE_TAG=${{ github.event.inputs.BUILD_BASE_IMAGE_TAG }}" >> $GITHUB_ENV
         fi
 
     - name: Get Image Refs
