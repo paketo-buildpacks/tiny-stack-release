@@ -101,7 +101,6 @@ jobs:
         echo "::set-output name=version::${bumped_version}"
 
         sudo skopeo copy "docker://${RUN_CNB_IMAGE}" "docker://gcr.io/cf-buildpacks-releng/run-test:tiny-cnb"
-        sudo skopeo copy "docker://${RUN_CNB_IMAGE}" "docker://gcr.io/cf-buildpacks-releng/run-test:$bumped_version-tiny-cnb"
 
         sudo skopeo copy "docker://${RUN_BASE_IMAGE}" "docker://index.docker.io/coredeps/run-rc:tiny"
         sudo skopeo copy "docker://${RUN_BASE_IMAGE}" "docker://index.docker.io/coredeps/run-rc:$bumped_version-tiny"
