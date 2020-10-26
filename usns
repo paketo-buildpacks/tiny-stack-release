@@ -1,1 +1,6 @@
-[]
+[
+    {
+        "title": "USN-4602-1: Perl vulnerabilities",
+        "release": "unreleased"
+    }
+]
