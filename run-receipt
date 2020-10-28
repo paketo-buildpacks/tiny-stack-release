@@ -1,7 +1,7 @@
                   Name                              Version                            Architecture
 +++-===================================-===================================-===================================
 ii  base-files                          10.1ubuntu2.10                      amd64                              
-ii  ca-certificates                     20190110~18.04.1                    all                                
+ii  ca-certificates                     20201027ubuntu0.18.04.1             all                                
 ii  libc6                               2.27-3ubuntu1.2                     amd64                              
 ii  libssl1.1                           1.1.1-1ubuntu2.1~18.04.6            amd64                              
 ii  netbase                             5.4                                 all                                
