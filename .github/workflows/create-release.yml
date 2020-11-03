@@ -10,6 +10,8 @@ on:
         required: false
 
 env:
+  BUILD_REPO: "paketobuildpacks/build"
+  RUN_REPO: "paketobuildpacks/run"
   TAG: ${{ github.event.client_payload.tag }}
   BUILD_BASE_IMAGE_TAG: ${{ github.event.client_payload.build_base_image_tag }}
 
@@ -33,10 +35,10 @@ jobs:
       run: |
         docker login -u ${{ secrets.CORE_DEPS_DOCKER_USER }} -p ${{ secrets.CORE_DEPS_DOCKER_PASS }}
 
-        run_base_sha="$(skopeo inspect docker://coredeps/run-rc:"${TAG}"-tiny | jq .Digest -r)"
-        run_cnb_sha="$(skopeo inspect docker://coredeps/run-rc:"${TAG}"-tiny-cnb | jq .Digest -r)"
-        build_base_sha="$(skopeo inspect docker://paketobuildpacks/build:${{ env.BUILD_BASE_IMAGE_TAG }} | jq .Digest -r)"
-        build_cnb_sha="$(skopeo inspect docker://coredeps/build-rc:"${TAG}"-tiny-cnb | jq .Digest -r)"
+        run_base_sha="$(skopeo inspect "docker://${RUN_REPO}:${TAG}-tiny" | jq .Digest -r)"
+        run_cnb_sha="$(skopeo inspect "docker://${RUN_REPO}:${TAG}-tiny-cnb" | jq .Digest -r)"
+        build_base_sha="$(skopeo inspect "docker://${BUILD_REPO}:${{ env.BUILD_BASE_IMAGE_TAG }}" | jq .Digest -r)"
+        build_cnb_sha="$(skopeo inspect "docker://${BUILD_REPO}:${TAG}-tiny-cnb" | jq .Digest -r)"
 
         echo "::set-output name=run_base_sha::${run_base_sha}"
         echo "::set-output name=run_cnb_sha::${run_cnb_sha}"
@@ -63,11 +65,11 @@ jobs:
       id: create-release-notes
       uses: paketo-buildpacks/stacks/actions/release-notes@main
       with:
-        build_base_image: "paketobuildpacks/build@${{ steps.image-refs.outputs.build_base_sha }}"
-        build_base_image_tag: "paketobuildpacks/build:${{ env.BUILD_BASE_IMAGE_TAG }}"
-        build_cnb_image: "coredeps/build-rc@${{ steps.image-refs.outputs.build_cnb_sha }}"
-        run_cnb_image: "coredeps/run-rc@${{ steps.image-refs.outputs.run_cnb_sha }}"
-        run_base_image: "coredeps/run-rc@${{ steps.image-refs.outputs.run_base_sha }}"
+        build_base_image: "${{ env.BUILD_REPO }}@${{ steps.image-refs.outputs.build_base_sha }}"
+        build_base_image_tag: "${{ env.BUILD_REPO }}:${{ env.BUILD_BASE_IMAGE_TAG }}"
+        build_cnb_image: "${{ env.BUILD_REPO }}@${{ steps.image-refs.outputs.build_cnb_sha }}"
+        run_cnb_image: "${{ env.RUN_REPO }}@${{ steps.image-refs.outputs.run_cnb_sha }}"
+        run_base_image: "${{ env.RUN_REPO }}@${{ steps.image-refs.outputs.run_base_sha }}"
         build_receipt_diff: ${{ steps.receipt.outputs.build_diff }}
         run_receipt_diff: ${{ steps.receipt.outputs.run_diff }}
         relevant_usns: usns
