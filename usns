@@ -5,6 +5,6 @@
     },
     {
         "title": "USN-4602-1: Perl vulnerabilities",
-        "release": "unreleased"
+        "release": "0.0.5"
     }
 ]
