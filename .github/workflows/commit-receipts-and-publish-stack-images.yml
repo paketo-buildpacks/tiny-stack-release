@@ -124,6 +124,23 @@ jobs:
         sudo skopeo copy "docker://${BUILD_CNB_IMAGE}" "docker://paketobuildpacks/build:tiny-cnb"
         sudo skopeo copy "docker://${BUILD_CNB_IMAGE}" "docker://paketobuildpacks/build:$version-tiny-cnb"
 
+    - name: Publish Cloudfoundry Images
+      if: steps.commit.outputs.PUBLISH
+      run: |
+        version="${{ steps.publish.outputs.version }}"
+
+        docker login -u ${{ secrets.CLOUDFOUNDRY_DOCKERHUB_USERNAME }} --password-stdin \
+          < <(echo "${{ secrets.CLOUDFOUNDRY_DOCKERHUB_PASSWORD }}")
+
+        sudo skopeo copy "docker://${BUILD_CNB_IMAGE}" "docker://cloudfoundry/build:tiny-cnb"
+        sudo skopeo copy "docker://${BUILD_CNB_IMAGE}" "docker://cloudfoundry/build:$version-tiny-cnb"
+
+        sudo skopeo copy "docker://${RUN_BASE_IMAGE}" "docker://cloudfoundry/run:tiny"
+        sudo skopeo copy "docker://${RUN_BASE_IMAGE}" "docker://cloudfoundry/run:$version-tiny"
+
+        sudo skopeo copy "docker://${RUN_CNB_IMAGE}" "docker://cloudfoundry/run:tiny-cnb"
+        sudo skopeo copy "docker://${RUN_CNB_IMAGE}" "docker://cloudfoundry/run:$version-tiny-cnb"
+
     - name: Trigger Release
       if: steps.commit.outputs.PUBLISH
       uses: paketo-buildpacks/github-config/actions/dispatch@main
