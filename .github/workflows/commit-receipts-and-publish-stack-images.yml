@@ -125,8 +125,8 @@ jobs:
         sudo skopeo copy "docker://${RUN_BASE_IMAGE}" "docker://paketobuildpacks/run:$version-tiny"
 
         docker push "paketobuildpacks/run:tiny-cnb"
-        sudo skopeo copy "paketobuildpacks/run:tiny-cnb" "docker://paketobuildpacks/run:$version-tiny-cnb"
-        sudo skopeo copy "paketobuildpacks/run:tiny-cnb" "docker://gcr.io/paketo-buildpacks/run:tiny-cnb"
+        sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://paketobuildpacks/run:$version-tiny-cnb"
+        sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://gcr.io/paketo-buildpacks/run:tiny-cnb"
 
     - name: Publish Cloudfoundry Images
       if: steps.commit.outputs.PUBLISH
@@ -142,8 +142,8 @@ jobs:
         sudo skopeo copy "docker://${RUN_BASE_IMAGE}" "docker://cloudfoundry/run:tiny"
         sudo skopeo copy "docker://${RUN_BASE_IMAGE}" "docker://cloudfoundry/run:$version-tiny"
 
-        sudo skopeo copy "paketobuildpacks/run:tiny-cnb" "docker://cloudfoundry/run:tiny-cnb"
-        sudo skopeo copy "paketobuildpacks/run:tiny-cnb" "docker://cloudfoundry/run:$version-tiny-cnb"
+        sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://cloudfoundry/run:tiny-cnb"
+        sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://cloudfoundry/run:$version-tiny-cnb"
 
     - name: Trigger Release
       if: steps.commit.outputs.PUBLISH
