@@ -113,13 +113,23 @@ jobs:
         fi
         echo "::set-output name=version::${version}"
 
+        published_build_base_image="$(echo "${BUILD_BASE_IMAGE}" | sed 's/build-rc@/build@/')"
         published_run_base_image="$(echo "${RUN_BASE_IMAGE}" | sed 's/run-rc@/run@/')"
+
+        echo "FROM ${BUILD_CNB_IMAGE}" | \
+          docker build -t "paketobuildpacks/build:tiny-cnb" \
+          --label "io.buildpacks.stack.metadata={\"base-image\": \"${published_build_base_image}\"}" -
+
         echo "FROM ${RUN_CNB_IMAGE}" | \
           docker build -t "paketobuildpacks/run:tiny-cnb" \
           --label "io.buildpacks.stack.metadata={\"base-image\": \"${published_run_base_image}\"}" -
 
         sudo skopeo copy "docker://${BUILD_CNB_IMAGE}" "docker://paketobuildpacks/build:tiny-cnb"
         sudo skopeo copy "docker://${BUILD_CNB_IMAGE}" "docker://paketobuildpacks/build:$version-tiny-cnb"
+
+        docker push "paketobuildpacks/build:tiny-cnb"
+        sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://paketobuildpacks/build:$version-tiny-cnb"
+        sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://gcr.io/paketo-buildpacks/build:tiny-cnb"
 
         sudo skopeo copy "docker://${RUN_BASE_IMAGE}" "docker://paketobuildpacks/run:tiny"
         sudo skopeo copy "docker://${RUN_BASE_IMAGE}" "docker://paketobuildpacks/run:$version-tiny"
