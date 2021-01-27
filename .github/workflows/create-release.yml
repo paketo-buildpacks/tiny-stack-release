@@ -7,7 +7,7 @@ on:
       TAG:
         required: true
       BUILD_BASE_IMAGE_TAG:
-        required: false
+        required: true
 
 env:
   BUILD_REPO: "paketobuildpacks/build"
