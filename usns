@@ -1,5 +1,9 @@
 [
     {
+        "title": "USN-4719-1: ca-certificates update",
+        "release": "unreleased"
+    },
+    {
         "title": "USN-4692-1: tar vulnerabilities",
         "release": "1.0.19"
     },
