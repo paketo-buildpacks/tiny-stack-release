@@ -13,7 +13,7 @@ on:
       BUILD_CNB_IMAGE:
         required: true
       BUILD_BASE_IMAGE_TAG:
-        required: false        
+        required: false
 
 env:
   RUN_BASE_IMAGE: ${{ github.event.client_payload.run_base_image }}
@@ -43,7 +43,7 @@ jobs:
           echo "RUN_CNB_IMAGE=${{ github.event.inputs.RUN_CNB_IMAGE }}" >> $GITHUB_ENV
           echo "BUILD_BASE_IMAGE=${{ github.event.inputs.BUILD_BASE_IMAGE }}" >> $GITHUB_ENV
           echo "BUILD_CNB_IMAGE=${{ github.event.inputs.BUILD_CNB_IMAGE }}" >> $GITHUB_ENV
-          echo "BUILD_BASE_IMAGE_TAG=${{ github.event.inputs.BUILD_BASE_IMAGE_TAG }}" >> $GITHUB_ENV          
+          echo "BUILD_BASE_IMAGE_TAG=${{ github.event.inputs.BUILD_BASE_IMAGE_TAG }}" >> $GITHUB_ENV
         fi
 
     - name: Docker login
@@ -55,7 +55,7 @@ jobs:
       run: |
         docker pull "${BUILD_CNB_IMAGE}"
         docker run "${BUILD_CNB_IMAGE}" dpkg -l > build-receipt
-       
+
         echo "${BUILD_BASE_IMAGE}" > build-base-image
         echo "${BUILD_CNB_IMAGE}" > build-cnb-image
         echo "${BUILD_BASE_IMAGE_TAG}" > build-base-image-tag
@@ -75,12 +75,12 @@ jobs:
         EOF
 
         for pkg in /tmp/tiny-pkgs/*; do
-          name="$(cat "${pkg}" | grep Package: | cut -d ' ' -f2)"
-          version="$(cat "${pkg}" | grep Version: | cut -d ' ' -f2)"
-          arch="$(cat "${pkg}" | grep Architecture: | cut -d ' ' -f2)"
+          name="$(cat "${pkg}" | grep ^Package: | cut -d ' ' -f2)"
+          version="$(cat "${pkg}" | grep ^Version: | cut -d ' ' -f2)"
+          arch="$(cat "${pkg}" | grep ^Architecture: | cut -d ' ' -f2)"
 
           printf "ii  %-35s %-35s %-35s\n" ${name} ${version} ${arch} >> run-receipt
-        done        
+        done
 
     - name: Commit
       id: commit
