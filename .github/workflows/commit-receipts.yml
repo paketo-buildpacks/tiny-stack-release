@@ -19,7 +19,7 @@ env:
   RUN_BASE_IMAGE: ${{ github.event.client_payload.run_base_image }}
   RUN_CNB_IMAGE: ${{ github.event.client_payload.run_cnb_image }}
   BUILD_BASE_IMAGE: ${{ github.event.client_payload.build_base_image }}
-  BUILD_CNB_IMAGE: ${{ github.event.client_payload.build_cnb_image }}}
+  BUILD_CNB_IMAGE: ${{ github.event.client_payload.build_cnb_image }}
   BUILD_BASE_IMAGE_TAG: ${{ github.event.client_payload.build_base_image_tag }}
 
 jobs:
