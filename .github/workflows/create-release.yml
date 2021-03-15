@@ -6,14 +6,11 @@ on:
     inputs:
       TAG:
         required: true
-      BUILD_BASE_IMAGE_TAG:
-        required: true
 
 env:
   BUILD_REPO: "paketobuildpacks/build"
   RUN_REPO: "paketobuildpacks/run"
   TAG: ${{ github.event.client_payload.tag }}
-  BUILD_BASE_IMAGE_TAG: ${{ github.event.client_payload.build_base_image_tag }}
 
 jobs:
   create-release:
@@ -31,13 +28,7 @@ jobs:
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           echo "TAG=${{ github.event.inputs.TAG }}" >> $GITHUB_ENV
-          echo "BUILD_BASE_IMAGE_TAG=${{ github.event.inputs.BUILD_BASE_IMAGE_TAG }}" >> $GITHUB_ENV
         fi
-
-    - name: Docker login
-      run: |
-        docker login -u ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_USERNAME }} --password-stdin \
-          < <(echo "${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD }}")
 
     - name: Get Image Refs
       id: image-refs
@@ -45,7 +36,7 @@ jobs:
       run: |
         run_base_sha="$(skopeo inspect "docker://${RUN_REPO}:${TAG}-tiny" | jq .Digest -r)"
         run_cnb_sha="$(skopeo inspect "docker://${RUN_REPO}:${TAG}-tiny-cnb" | jq .Digest -r)"
-        build_base_sha="$(skopeo inspect "docker://${BUILD_REPO}:${{ env.BUILD_BASE_IMAGE_TAG }}" | jq .Digest -r)"
+        build_base_sha="$(skopeo inspect "docker://${BUILD_REPO}:${TAG}-tiny" | jq .Digest -r)"
         build_cnb_sha="$(skopeo inspect "docker://${BUILD_REPO}:${TAG}-tiny-cnb" | jq .Digest -r)"
 
         echo "::set-output name=run_base_sha::${run_base_sha}"
@@ -74,7 +65,6 @@ jobs:
       uses: paketo-buildpacks/stacks/actions/release-notes@main
       with:
         build_base_image: "${{ env.BUILD_REPO }}@${{ steps.image-refs.outputs.build_base_sha }}"
-        build_base_image_tag: "${{ env.BUILD_REPO }}:${{ env.BUILD_BASE_IMAGE_TAG }}"
         build_cnb_image: "${{ env.BUILD_REPO }}@${{ steps.image-refs.outputs.build_cnb_sha }}"
         run_cnb_image: "${{ env.RUN_REPO }}@${{ steps.image-refs.outputs.run_cnb_sha }}"
         run_base_image: "${{ env.RUN_REPO }}@${{ steps.image-refs.outputs.run_base_sha }}"
