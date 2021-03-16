@@ -78,8 +78,6 @@ jobs:
         build_base_image="$(cat build-base-image)"
         run_base_image="$(cat run-base-image)"
 
-        echo "::set-output name=build_base_image_tag::$(cat build-base-image-tag)"
-
         published_build_base_image="$(echo "$build_base_image" | sed 's/build-rc@/build@/')"
         published_run_base_image="$(echo "$run_base_image" | sed 's/run-rc@/run@/')"
 
@@ -101,7 +99,6 @@ jobs:
         sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://paketobuildpacks/build:${version}-tiny-cnb"
         sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://paketobuildpacks/build:tiny-cnb"
 
-
         sudo skopeo copy "docker://${run_base_image}" "docker://paketobuildpacks/run:tiny"
         sudo skopeo copy "docker://${run_base_image}" "docker://paketobuildpacks/run:${version}-tiny"
 
@@ -121,6 +118,9 @@ jobs:
         sudo skopeo copy "docker://${build_base_image}" "docker://cloudfoundry/build:tiny-cnb"
         sudo skopeo copy "docker://${build_base_image}" "docker://cloudfoundry/build:${version}-tiny-cnb"
 
+        sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://cloudfoundry/build:tiny-cnb"
+        sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://cloudfoundry/build:${version}-tiny-cnb"
+
         sudo skopeo copy "docker://${run_base_image}" "docker://cloudfoundry/run:tiny"
         sudo skopeo copy "docker://${run_base_image}" "docker://cloudfoundry/run:${version}-tiny"
 
@@ -135,6 +135,5 @@ jobs:
         event: receipt-update
         payload: |
           {
-            "tag": "${{ steps.publish.outputs.version }}",
-            "build_base_image_tag" : "${{ steps.publish.outputs.build_base_image_tag }}"
+            "tag": "${{ steps.publish.outputs.version }}"
           }
