@@ -92,12 +92,11 @@ jobs:
           docker build -t "paketobuildpacks/run:tiny-cnb" \
           --label "io.buildpacks.stack.metadata={\"base-image\": \"${published_run_base_image}\"}" -
 
-        sudo skopeo copy "docker://${build_cnb_image}" "docker://paketobuildpacks/build:tiny-cnb"
-        sudo skopeo copy "docker://${build_cnb_image}" "docker://paketobuildpacks/build:$version-tiny-cnb"
+        sudo skopeo copy "docker://${build_base_image}" "docker://paketobuildpacks/build:tiny"
+        sudo skopeo copy "docker://${build_base_image}" "docker://paketobuildpacks/build:${version}-tiny"
 
         docker push "paketobuildpacks/build:tiny-cnb"
         sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://paketobuildpacks/build:${version}-tiny-cnb"
-        sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://paketobuildpacks/build:tiny-cnb"
 
         sudo skopeo copy "docker://${run_base_image}" "docker://paketobuildpacks/run:tiny"
         sudo skopeo copy "docker://${run_base_image}" "docker://paketobuildpacks/run:${version}-tiny"
