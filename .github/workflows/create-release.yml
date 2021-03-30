@@ -1,7 +1,9 @@
 name: Create Release
 on:
-  repository_dispatch:
-    types: [receipt-update]
+  pull_request:
+    paths:
+      - 'build-receipt'
+      - 'run-receipt'
   workflow_dispatch:
     inputs:
       TAG:
@@ -17,92 +19,186 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Checkout Branch
-      uses: paketo-buildpacks/github-config/actions/pull-request/checkout-branch@main
-      with:
-        branch: automation/usns/release    
+      - name: Checkout Branch
+        uses: paketo-buildpacks/github-config/actions/pull-request/checkout-branch@main
+        with:
+          branch: automation/receipts/update
 
-    - name: Set Env Vars
-      run: |
-        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          echo "TAG=${{ github.event.inputs.TAG }}" >> $GITHUB_ENV
-        fi
+      - uses: google-github-actions/setup-gcloud@master
+        with:
+          version: '270.0.0'
+          service_account_key: ${{ secrets.GCR_PUSH_BOT_JSON_KEY }}
 
-    - name: Get Image Refs
-      id: image-refs
-      shell: bash --noprofile --norc -eo pipefail {0}
-      run: |
-        run_base_sha="$(skopeo inspect "docker://${RUN_REPO}:${TAG}-tiny" | jq .Digest -r)"
-        run_cnb_sha="$(skopeo inspect "docker://${RUN_REPO}:${TAG}-tiny-cnb" | jq .Digest -r)"
-        build_base_sha="$(skopeo inspect "docker://${BUILD_REPO}:${TAG}-tiny" | jq .Digest -r)"
-        build_cnb_sha="$(skopeo inspect "docker://${BUILD_REPO}:${TAG}-tiny-cnb" | jq .Digest -r)"
+      - name: Configure docker gcloud auth
+        run: gcloud auth configure-docker
 
-        echo "::set-output name=run_base_sha::${run_base_sha}"
-        echo "::set-output name=run_cnb_sha::${run_cnb_sha}"
-        echo "::set-output name=build_base_sha::${build_base_sha}"
-        echo "::set-output name=build_cnb_sha::${build_cnb_sha}"
+      - name: Docker login
+        run: |
+          docker login -u ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_USERNAME }} --password-stdin \
+          < <(echo "${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD }}")
 
-    - name: Generate receipt diffs
-      id: receipt
-      uses: paketo-buildpacks/stacks/actions/receipt-diff@main
-      with:
-        repo: ${{ github.repository }}
-        user: paketo-bot
-        token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+      - name: Set Env Vars
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "TAG=${{ github.event.inputs.TAG }}" >> $GITHUB_ENV
+          fi
 
-    - name: Get USN List
-      id: get-usns
-      run: |
-        curl -sL --fail -u 'paketo-bot:${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}' \
-          api.github.com/repos/paketo-buildpacks/stack-usns/contents/usns | \
-          jq -r '.content' | base64 --decode > full-usn-list
-        echo "::set-output name=usn_path::full-usn-list"
+      - name: Get package diff
+        id: get-package-diff
+        uses: paketo-buildpacks/stacks/actions/get-package-diff@main
+        with:
+          ref: ${{ github.sha }}
 
-    - name: Create Release Notes
-      id: create-release-notes
-      uses: paketo-buildpacks/stacks/actions/release-notes@main
-      with:
-        build_base_image: "${{ env.BUILD_REPO }}@${{ steps.image-refs.outputs.build_base_sha }}"
-        build_cnb_image: "${{ env.BUILD_REPO }}@${{ steps.image-refs.outputs.build_cnb_sha }}"
-        run_cnb_image: "${{ env.RUN_REPO }}@${{ steps.image-refs.outputs.run_cnb_sha }}"
-        run_base_image: "${{ env.RUN_REPO }}@${{ steps.image-refs.outputs.run_base_sha }}"
-        build_receipt_diff: ${{ steps.receipt.outputs.build_diff }}
-        run_receipt_diff: ${{ steps.receipt.outputs.run_diff }}
-        relevant_usns: usns
-        all_usns: ${{ steps.get-usns.outputs.usn_path }}
-        release_version: ${{ env.TAG }}
-        stack: tiny
+      - name: Check for removed packages
+        run: |
+          removed=false
+          if [[ -n "${{ steps.get-package-diff.outputs.removed-build-packages }}" ]]; then
+            echo "Packages removed from build image: ${{ steps.get-package-diff.outputs.removed-build-packages }}"
+            removed=true
+          fi
+          if [[ -n "${{ steps.get-package-diff.outputs.removed-run-packages }}" ]]; then
+            echo "Packages removed from run image: ${{ steps.get-package-diff.outputs.removed-run-packages }}"
+            removed=true
+          fi
+          if [[ "${removed}" == "true" ]]; then
+            exit 1
+          fi
 
-    - name: Create Release
-      uses: paketo-buildpacks/github-config/actions/release/create@main
-      with:
-        repo: ${{ github.repository }}
-        token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
-        tag_name: ${{ env.TAG }}
-        target_commitish: ${{ github.sha }}
-        name: ${{ env.TAG }}
-        body: ${{ steps.create-release-notes.outputs.release_body }}
-        draft: false
+      - name: Publish Images
+        id: publish
+        run: |
+          version="${VERSION}"
+          if [[ "${version}" == '' ]]; then
+            last_version="$(curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/$GITHUB_REPOSITORY/tags | jq -r '.[0].name // "0.0.0"')"
 
-    - name: Commit
-      id: commit
-      uses: paketo-buildpacks/github-config/actions/pull-request/create-commit@main
-      with:
-        message: "Update USNs"
-        pathspec: "usns"
+            if [[ -n "${{ steps.get-package-diff.outputs.added-build-packages }}" ]] || [[ -n "${{ steps.get-package-diff.outputs.added-run-packages }}" ]]; then
+              bumped_minor="$(($(echo $last_version | cut -d . -f 2) + 1))"
+              version="$( echo $last_version | cut -d . -f 1)".$bumped_minor.0
+            else
+              bumped_patch="$(($(echo $last_version | cut -d . -f 3) + 1))"
+              version="$( echo $last_version | cut -d . -f 1-2)".$bumped_patch
+            fi
+          fi
+          echo "::set-output name=version::${version}"
 
-    - name: Push Branch
-      if: ${{ steps.commit.outputs.commit_sha != '' }}
-      uses: paketo-buildpacks/github-config/actions/pull-request/push-branch@main
-      with:
-        branch: automation/usns/release
+          build_base_image="$(cat build-base-image)"
+          run_base_image="$(cat run-base-image)"
 
-    - name: Open Pull Request
-      if: ${{ steps.commit.outputs.commit_sha != '' }}
-      uses: paketo-buildpacks/github-config/actions/pull-request/open@main
-      with:
-        token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
-        title: "Update USNs"
-        branch: automation/usns/release
+          published_build_base_image="$(echo "$build_base_image" | sed 's|paketotesting/build-rc@|paketobuildpacks/build@|')"
+          published_run_base_image="$(echo "$run_base_image" | sed 's|paketotesting/run-rc@|paketobuildpacks/run@|')"
+
+          build_cnb_image="$(cat build-cnb-image)"
+          run_cnb_image="$(cat run-cnb-image)"
+
+          echo "FROM ${build_cnb_image}" | \
+            docker build -t "paketobuildpacks/build:tiny-cnb" \
+            --label "io.buildpacks.stack.metadata={\"base-image\": \"${published_build_base_image}\"}" -
+
+          echo "FROM ${run_cnb_image}" | \
+            docker build -t "paketobuildpacks/run:tiny-cnb" \
+            --label "io.buildpacks.stack.metadata={\"base-image\": \"${published_run_base_image}\"}" -
+
+          sudo skopeo copy "docker://${build_base_image}" "docker://paketobuildpacks/build:tiny"
+          sudo skopeo copy "docker://${build_base_image}" "docker://paketobuildpacks/build:${version}-tiny"
+
+          docker push "paketobuildpacks/build:tiny-cnb"
+          sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://paketobuildpacks/build:${version}-tiny-cnb"
+
+          sudo skopeo copy "docker://${run_base_image}" "docker://paketobuildpacks/run:tiny"
+          sudo skopeo copy "docker://${run_base_image}" "docker://paketobuildpacks/run:${version}-tiny"
+
+          docker push "paketobuildpacks/run:tiny-cnb"
+          sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://paketobuildpacks/run:${version}-tiny-cnb"
+          sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://gcr.io/paketo-buildpacks/run:tiny-cnb"
+
+      - name: Publish Cloudfoundry Images
+        run: |
+          build_base_image="$(cat build-base-image)"
+          run_base_image="$(cat run-base-image)"
+          version="${{ steps.publish.outputs.version }}"
+
+          docker login -u ${{ secrets.CLOUDFOUNDRY_DOCKERHUB_USERNAME }} --password-stdin \
+          < <(echo "${{ secrets.CLOUDFOUNDRY_DOCKERHUB_PASSWORD }}")
+
+          sudo skopeo copy "docker://${build_base_image}" "docker://cloudfoundry/build:tiny-cnb"
+          sudo skopeo copy "docker://${build_base_image}" "docker://cloudfoundry/build:${version}-tiny-cnb"
+
+          sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://cloudfoundry/build:tiny-cnb"
+          sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://cloudfoundry/build:${version}-tiny-cnb"
+
+          sudo skopeo copy "docker://${run_base_image}" "docker://cloudfoundry/run:tiny"
+          sudo skopeo copy "docker://${run_base_image}" "docker://cloudfoundry/run:${version}-tiny"
+
+          sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://cloudfoundry/run:tiny-cnb"
+          sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://cloudfoundry/run:${version}-tiny-cnb"
+
+      - name: Get Image Refs
+        id: image-refs
+        shell: bash --noprofile --norc -eo pipefail {0}
+        run: |
+          run_base_sha="$(skopeo inspect "docker://${RUN_REPO}:${TAG}-tiny" | jq .Digest -r)"
+          run_cnb_sha="$(skopeo inspect "docker://${RUN_REPO}:${TAG}-tiny-cnb" | jq .Digest -r)"
+          build_base_sha="$(skopeo inspect "docker://${BUILD_REPO}:${TAG}-tiny" | jq .Digest -r)"
+          build_cnb_sha="$(skopeo inspect "docker://${BUILD_REPO}:${TAG}-tiny-cnb" | jq .Digest -r)"
+
+          echo "::set-output name=run_base_sha::${run_base_sha}"
+          echo "::set-output name=run_cnb_sha::${run_cnb_sha}"
+          echo "::set-output name=build_base_sha::${build_base_sha}"
+          echo "::set-output name=build_cnb_sha::${build_cnb_sha}"
+
+      - name: Generate receipt diffs
+        id: receipt
+        uses: paketo-buildpacks/stacks/actions/receipt-diff@main
+        with:
+          repo: ${{ github.repository }}
+          user: paketo-bot
+          token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+
+      - name: Get USN List
+        id: get-usns
+        run: |
+          curl -sL --fail -u 'paketo-bot:${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}' \
+            api.github.com/repos/paketo-buildpacks/stack-usns/contents/usns | \
+            jq -r '.content' | base64 --decode > full-usn-list
+          echo "::set-output name=usn_path::full-usn-list"
+
+      - name: Create Release Notes
+        id: create-release-notes
+        uses: paketo-buildpacks/stacks/actions/release-notes@main
+        with:
+          build_base_image: "${{ env.BUILD_REPO }}@${{ steps.image-refs.outputs.build_base_sha }}"
+          build_cnb_image: "${{ env.BUILD_REPO }}@${{ steps.image-refs.outputs.build_cnb_sha }}"
+          run_cnb_image: "${{ env.RUN_REPO }}@${{ steps.image-refs.outputs.run_cnb_sha }}"
+          run_base_image: "${{ env.RUN_REPO }}@${{ steps.image-refs.outputs.run_base_sha }}"
+          build_receipt_diff: ${{ steps.receipt.outputs.build_diff }}
+          run_receipt_diff: ${{ steps.receipt.outputs.run_diff }}
+          relevant_usns: usns
+          all_usns: ${{ steps.get-usns.outputs.usn_path }}
+          release_version: ${{ env.TAG }}
+          stack: tiny
+
+      - name: Commit
+        id: commit
+        uses: paketo-buildpacks/github-config/actions/pull-request/create-commit@main
+        with:
+          message: "Update USNs"
+          pathspec: "usns"
+
+      - name: Push Branch
+        if: ${{ steps.commit.outputs.commit_sha != '' }}
+        uses: paketo-buildpacks/github-config/actions/pull-request/push-branch@main
+        with:
+          branch: automation/receipts/update
+
+      - name: Create Release
+        uses: paketo-buildpacks/github-config/actions/release/create@main
+        with:
+          repo: ${{ github.repository }}
+          token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+          tag_name: ${{ env.TAG }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ env.TAG }}
+          body: ${{ steps.create-release-notes.outputs.release_body }}
+          draft: false
