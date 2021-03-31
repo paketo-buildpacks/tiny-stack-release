@@ -45,7 +45,7 @@ jobs:
       - name: Test stack
         uses: paketo-buildpacks/stacks/actions/test-stack@main
         with:
-          stack_id: 'io.buildpacks.stacks.bionic'
+          stack_id: 'io.buildpacks.stacks.tiny'
           build_cnb_image: ${{ steps.build-images.outputs.build_cnb_sha }}
           run_cnb_image: ${{ steps.build-images.outputs.run_cnb_sha }}
 
