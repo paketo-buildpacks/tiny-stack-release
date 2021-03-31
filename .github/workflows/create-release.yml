@@ -39,17 +39,31 @@ jobs:
           docker login -u ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_USERNAME }} --password-stdin \
           < <(echo "${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD }}")
 
-      - name: Set Env Vars
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "TAG=${{ github.event.inputs.TAG }}" >> $GITHUB_ENV
-          fi
-
       - name: Get package diff
         id: get-package-diff
         uses: paketo-buildpacks/stacks/actions/get-package-diff@main
         with:
           ref: ${{ github.sha }}
+
+      - name: Set Env Vars
+        run: |
+          tag="${TAG}"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            tag=${{ github.event.inputs.TAG }}
+          fi
+          if [[ "${tag}" == '' ]]; then
+            last_tag="$(curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/$GITHUB_REPOSITORY/tags | jq -r '.[0].name // "0.0.0"')"
+
+            if [[ -n "${{ steps.get-package-diff.outputs.added-build-packages }}" ]] || [[ -n "${{ steps.get-package-diff.outputs.added-run-packages }}" ]]; then
+             bumped_minor="$(($(echo $last_tag | cut -d . -f 2) + 1))"
+             tag="$( echo $last_tag | cut -d . -f 1)".$bumped_minor.0
+            else
+             bumped_patch="$(($(echo $last_tag | cut -d . -f 3) + 1))"
+             tag="$( echo $last_tag | cut -d . -f 1-2)".$bumped_patch
+            fi
+          fi
+
+          echo "TAG=${tag}" >> $GITHUB_ENV
 
       - name: Check for removed packages
         run: |
@@ -69,20 +83,6 @@ jobs:
       - name: Publish Images
         id: publish
         run: |
-          version="${VERSION}"
-          if [[ "${version}" == '' ]]; then
-            last_version="$(curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/$GITHUB_REPOSITORY/tags | jq -r '.[0].name // "0.0.0"')"
-
-            if [[ -n "${{ steps.get-package-diff.outputs.added-build-packages }}" ]] || [[ -n "${{ steps.get-package-diff.outputs.added-run-packages }}" ]]; then
-              bumped_minor="$(($(echo $last_version | cut -d . -f 2) + 1))"
-              version="$( echo $last_version | cut -d . -f 1)".$bumped_minor.0
-            else
-              bumped_patch="$(($(echo $last_version | cut -d . -f 3) + 1))"
-              version="$( echo $last_version | cut -d . -f 1-2)".$bumped_patch
-            fi
-          fi
-          echo "::set-output name=version::${version}"
-
           build_base_image="$(cat .github/ci-artifacts/build-base-image)"
           run_base_image="$(cat .github/ci-artifacts/run-base-image)"
 
@@ -101,38 +101,37 @@ jobs:
             --label "io.buildpacks.stack.metadata={\"base-image\": \"${published_run_base_image}\"}" -
 
           sudo skopeo copy "docker://${build_base_image}" "docker://paketobuildpacks/build:tiny"
-          sudo skopeo copy "docker://${build_base_image}" "docker://paketobuildpacks/build:${version}-tiny"
+          sudo skopeo copy "docker://${build_base_image}" "docker://paketobuildpacks/build:${TAG}-tiny"
 
           docker push "paketobuildpacks/build:tiny-cnb"
-          sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://paketobuildpacks/build:${version}-tiny-cnb"
+          sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://paketobuildpacks/build:${TAG}-tiny-cnb"
 
           sudo skopeo copy "docker://${run_base_image}" "docker://paketobuildpacks/run:tiny"
-          sudo skopeo copy "docker://${run_base_image}" "docker://paketobuildpacks/run:${version}-tiny"
+          sudo skopeo copy "docker://${run_base_image}" "docker://paketobuildpacks/run:${TAG}-tiny"
 
           docker push "paketobuildpacks/run:tiny-cnb"
-          sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://paketobuildpacks/run:${version}-tiny-cnb"
+          sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://paketobuildpacks/run:${TAG}-tiny-cnb"
           sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://gcr.io/paketo-buildpacks/run:tiny-cnb"
 
       - name: Publish Cloudfoundry Images
         run: |
           build_base_image="$(cat .github/ci-artifacts/build-base-image)"
           run_base_image="$(cat .github/ci-artifacts/run-base-image)"
-          version="${{ steps.publish.outputs.version }}"
 
           docker login -u ${{ secrets.CLOUDFOUNDRY_DOCKERHUB_USERNAME }} --password-stdin \
           < <(echo "${{ secrets.CLOUDFOUNDRY_DOCKERHUB_PASSWORD }}")
 
           sudo skopeo copy "docker://${build_base_image}" "docker://cloudfoundry/build:tiny-cnb"
-          sudo skopeo copy "docker://${build_base_image}" "docker://cloudfoundry/build:${version}-tiny-cnb"
+          sudo skopeo copy "docker://${build_base_image}" "docker://cloudfoundry/build:${TAG}-tiny-cnb"
 
           sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://cloudfoundry/build:tiny-cnb"
-          sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://cloudfoundry/build:${version}-tiny-cnb"
+          sudo skopeo copy "docker://paketobuildpacks/build:tiny-cnb" "docker://cloudfoundry/build:${TAG}-tiny-cnb"
 
           sudo skopeo copy "docker://${run_base_image}" "docker://cloudfoundry/run:tiny"
-          sudo skopeo copy "docker://${run_base_image}" "docker://cloudfoundry/run:${version}-tiny"
+          sudo skopeo copy "docker://${run_base_image}" "docker://cloudfoundry/run:${TAG}-tiny"
 
           sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://cloudfoundry/run:tiny-cnb"
-          sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://cloudfoundry/run:${version}-tiny-cnb"
+          sudo skopeo copy "docker://paketobuildpacks/run:tiny-cnb" "docker://cloudfoundry/run:${TAG}-tiny-cnb"
 
       - name: Get Image Refs
         id: image-refs
