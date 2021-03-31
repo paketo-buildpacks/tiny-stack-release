@@ -51,19 +51,11 @@ jobs:
 
       - name: Generate build image receipt
         run: |
-          docker pull "${BUILD_CNB_IMAGE}"
-          docker run "${BUILD_CNB_IMAGE}" dpkg -l > build-receipt
-
-          echo "${BUILD_BASE_IMAGE}" > build-base-image
-          echo "${BUILD_CNB_IMAGE}" > build-cnb-image
-          echo "${BUILD_BASE_IMAGE_TAG}" > build-base-image-tag
-          echo "${RUN_BASE_IMAGE}" > run-base-image
-          echo "${RUN_CNB_IMAGE}" > run-cnb-image
+          docker run "${{ steps.build-images.outputs.build_cnb_sha }}" dpkg -l > build-receipt
 
       - name: Generate run image receipt
         run: |
-          docker pull "${RUN_CNB_IMAGE}"
-          container_id="$(docker create "${RUN_CNB_IMAGE}" sleep)"
+          container_id="$(docker create "${{ steps.build-images.outputs.run_cnb_sha }}" sleep)"
           docker cp "${container_id}":/var/lib/dpkg/status.d /tmp/tiny-pkgs
           docker rm -v "${container_id}"
 

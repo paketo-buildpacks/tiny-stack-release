@@ -83,14 +83,14 @@ jobs:
           fi
           echo "::set-output name=version::${version}"
 
-          build_base_image="$(cat build-base-image)"
-          run_base_image="$(cat run-base-image)"
+          build_base_image="$(cat .github/ci-artifacts/build-base-image)"
+          run_base_image="$(cat .github/ci-artifacts/run-base-image)"
 
           published_build_base_image="$(echo "$build_base_image" | sed 's|paketotesting/build-rc@|paketobuildpacks/build@|')"
           published_run_base_image="$(echo "$run_base_image" | sed 's|paketotesting/run-rc@|paketobuildpacks/run@|')"
 
-          build_cnb_image="$(cat build-cnb-image)"
-          run_cnb_image="$(cat run-cnb-image)"
+          build_cnb_image="$(cat .github/ci-artifacts/build-cnb-image)"
+          run_cnb_image="$(cat .github/ci-artifacts/run-cnb-image)"
 
           echo "FROM ${build_cnb_image}" | \
             docker build -t "paketobuildpacks/build:tiny-cnb" \
@@ -115,8 +115,8 @@ jobs:
 
       - name: Publish Cloudfoundry Images
         run: |
-          build_base_image="$(cat build-base-image)"
-          run_base_image="$(cat run-base-image)"
+          build_base_image="$(cat .github/ci-artifacts/build-base-image)"
+          run_base_image="$(cat .github/ci-artifacts/run-base-image)"
           version="${{ steps.publish.outputs.version }}"
 
           docker login -u ${{ secrets.CLOUDFOUNDRY_DOCKERHUB_USERNAME }} --password-stdin \
