@@ -4,7 +4,7 @@ Desired=Unknown/Install/Remove/Purge/Hold
 ||/ Name                       Version                             Architecture Description
 +++-==========================-===================================-============-===============================================================================
 ii  adduser                    3.116ubuntu1                        all          add and remove users and groups
-ii  apt                        1.6.12ubuntu0.2                     amd64        commandline package manager
+ii  apt                        1.6.13                              amd64        commandline package manager
 ii  base-files                 10.1ubuntu2.10                      amd64        Debian base system miscellaneous files
 ii  base-passwd                3.5.44                              amd64        Debian base system master password and group files
 ii  bash                       4.4.18-2ubuntu1.2                   amd64        GNU Bourne Again SHell
@@ -43,7 +43,7 @@ ii  hostname                   3.20                                amd64        
 ii  init-system-helpers        1.51                                all          helper tools for all init systems
 ii  jq                         1.5+dfsg-2                          amd64        lightweight and flexible command-line JSON processor
 ii  libacl1:amd64              2.2.52-3build1                      amd64        Access control list shared library
-ii  libapt-pkg5.0:amd64        1.6.12ubuntu0.2                     amd64        package management runtime library
+ii  libapt-pkg5.0:amd64        1.6.13                              amd64        package management runtime library
 ii  libasan4:amd64             7.5.0-3ubuntu1~18.04                amd64        AddressSanitizer -- a fast memory error detector
 ii  libasn1-8-heimdal:amd64    7.5.0+dfsg-1                        amd64        Heimdal Kerberos - ASN.1 library
 ii  libatomic1:amd64           8.4.0-1ubuntu1~18.04                amd64        support library providing __atomic built-in functions
