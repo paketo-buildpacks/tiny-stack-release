@@ -87,7 +87,7 @@ ii  libgssapi3-heimdal:amd64   7.5.0+dfsg-1                        amd64        
 ii  libhcrypto4-heimdal:amd64  7.5.0+dfsg-1                        amd64        Heimdal Kerberos - crypto library
 ii  libheimbase1-heimdal:amd64 7.5.0+dfsg-1                        amd64        Heimdal Kerberos - Base library
 ii  libheimntlm0-heimdal:amd64 7.5.0+dfsg-1                        amd64        Heimdal Kerberos - NTLM support library
-ii  libhogweed4:amd64          3.4-1ubuntu0.1                      amd64        low level cryptographic library (public-key cryptos)
+ii  libhogweed4:amd64          3.4.1-0ubuntu0.18.04.1              amd64        low level cryptographic library (public-key cryptos)
 ii  libhx509-5-heimdal:amd64   7.5.0+dfsg-1                        amd64        Heimdal Kerberos - X509 support library
 ii  libidn2-0:amd64            2.0.4-1.1ubuntu0.2                  amd64        Internationalized domain names (IDNA2008/TR46) library
 ii  libisl19:amd64             0.19-1                              amd64        manipulating sets and relations of integer points bounded by linear constraints
@@ -109,7 +109,7 @@ ii  libmpfr6:amd64             4.0.1-1                             amd64        
 ii  libmpx2:amd64              8.4.0-1ubuntu1~18.04                amd64        Intel memory protection extensions (runtime)
 ii  libncurses5:amd64          6.1-1ubuntu1.18.04                  amd64        shared libraries for terminal handling
 ii  libncursesw5:amd64         6.1-1ubuntu1.18.04                  amd64        shared libraries for terminal handling (wide character support)
-ii  libnettle6:amd64           3.4-1ubuntu0.1                      amd64        low level cryptographic library (symmetric and one-way cryptos)
+ii  libnettle6:amd64           3.4.1-0ubuntu0.18.04.1              amd64        low level cryptographic library (symmetric and one-way cryptos)
 ii  libnghttp2-14:amd64        1.30.0-1ubuntu1                     amd64        library implementing HTTP/2 protocol (shared library)
 ii  libonig4:amd64             6.7.0-1                             amd64        regular expressions library
 ii  libp11-kit0:amd64          0.23.9-2ubuntu0.1                   amd64        library for loading and coordinating access to PKCS#11 modules - runtime
@@ -137,12 +137,12 @@ ii  libss2:amd64               1.44.1-1ubuntu1.3                   amd64        
 ii  libssl1.1:amd64            1.1.1-1ubuntu2.1~18.04.9            amd64        Secure Sockets Layer toolkit - shared libraries
 ii  libstdc++-7-dev:amd64      7.5.0-3ubuntu1~18.04                amd64        GNU Standard C++ Library v3 (development files)
 ii  libstdc++6:amd64           8.4.0-1ubuntu1~18.04                amd64        GNU Standard C++ Library v3
-ii  libsystemd0:amd64          237-3ubuntu10.47                    amd64        systemd utility library
+ii  libsystemd0:amd64          237-3ubuntu10.48                    amd64        systemd utility library
 ii  libtasn1-6:amd64           4.13-2                              amd64        Manage ASN.1 structures (runtime)
 ii  libtinfo5:amd64            6.1-1ubuntu1.18.04                  amd64        shared low-level terminfo library for terminal handling
 ii  libtsan0:amd64             8.4.0-1ubuntu1~18.04                amd64        ThreadSanitizer -- a Valgrind-based detector of data races (runtime)
 ii  libubsan0:amd64            7.5.0-3ubuntu1~18.04                amd64        UBSan -- undefined behaviour sanitizer (runtime)
-ii  libudev1:amd64             237-3ubuntu10.47                    amd64        libudev shared library
+ii  libudev1:amd64             237-3ubuntu10.48                    amd64        libudev shared library
 ii  libunistring2:amd64        0.9.9-0ubuntu2                      amd64        Unicode string library for C
 ii  libuuid1:amd64             2.31.1-0.4ubuntu3.7                 amd64        Universally Unique ID library
 ii  libwind0-heimdal:amd64     7.5.0+dfsg-1                        amd64        Heimdal Kerberos - stringprep implementation
