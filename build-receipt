@@ -38,7 +38,7 @@ ii  git                        1:2.17.1-1ubuntu0.8                 amd64        
 ii  git-man                    1:2.17.1-1ubuntu0.8                 all          fast, scalable, distributed revision control system (manual pages)
 ii  gpgv                       2.2.4-1ubuntu1.4                    amd64        GNU privacy guard - signature verification tool
 ii  grep                       3.1-2build1                         amd64        GNU grep, egrep and fgrep
-ii  gzip                       1.6-5ubuntu1                        amd64        GNU compression utilities
+ii  gzip                       1.6-5ubuntu1.1                      amd64        GNU compression utilities
 ii  hostname                   3.20                                amd64        utility to set/show the host name or domain name
 ii  init-system-helpers        1.51                                all          helper tools for all init systems
 ii  jq                         1.5+dfsg-2                          amd64        lightweight and flexible command-line JSON processor
