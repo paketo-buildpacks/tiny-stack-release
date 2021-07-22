@@ -1,5 +1,9 @@
 [
     {
+        "title": "USN-5021-1: curl vulnerabilities",
+        "release": "unreleased"
+    },
+    {
         "title": "USN-4990-1: Nettle vulnerabilities",
         "release": "1.2.12"
     },
