@@ -73,7 +73,7 @@ ii  libfdisk1:amd64            2.31.1-0.4ubuntu3.7                 amd64        
 ii  libffi6:amd64              3.2.1-8                             amd64        Foreign Function Interface library runtime
 ii  libgcc-7-dev:amd64         7.5.0-3ubuntu1~18.04                amd64        GCC support library (development files)
 ii  libgcc1:amd64              1:8.4.0-1ubuntu1~18.04              amd64        GCC support library
-ii  libgcrypt20:amd64          1.8.1-4ubuntu1.2                    amd64        LGPL Crypto library - runtime library
+ii  libgcrypt20:amd64          1.8.1-4ubuntu1.3                    amd64        LGPL Crypto library - runtime library
 ii  libgdbm-compat4:amd64      1.14.1-6                            amd64        GNU dbm database routines (legacy support runtime version) 
 ii  libgdbm5:amd64             1.14.1-6                            amd64        GNU dbm database routines (runtime version) 
 ii  libgmp-dev:amd64           2:6.1.2+dfsg-2                      amd64        Multiprecision arithmetic library developers tools
