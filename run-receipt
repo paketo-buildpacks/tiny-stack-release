@@ -7,4 +7,4 @@ ii  libssl1.1                           1.1.1-1ubuntu2.1~18.04.15           amd6
 ii  netbase                             5.4                                 all                                
 ii  openssl                             1.1.1-1ubuntu2.1~18.04.15           amd64                              
 ii  tzdata                              2022a-0ubuntu0.18.04                all                                
-ii  zlib1g                              1:1.2.11.dfsg-0ubuntu2              amd64                              
+ii  zlib1g                              1:1.2.11.dfsg-0ubuntu2.1            amd64                              
