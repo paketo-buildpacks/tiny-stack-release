@@ -1,5 +1,9 @@
 [
     {
+        "title": "USN-5355-1: zlib vulnerability",
+        "release": "unreleased"
+    },
+    {
         "title": "USN-5329-1: tar vulnerability",
         "release": "unreleased"
     },
