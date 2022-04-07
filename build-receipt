@@ -94,7 +94,7 @@ ii  libisl19:amd64             0.19-1                              amd64        
 ii  libitm1:amd64              8.4.0-1ubuntu1~18.04                amd64        GNU Transactional Memory Library
 ii  libjq1:amd64               1.5+dfsg-2                          amd64        lightweight and flexible command-line JSON processor - shared library
 ii  libk5crypto3:amd64         1.16-2ubuntu0.2                     amd64        MIT Kerberos runtime libraries - Crypto Library
-ii  libkeyutils1:amd64         1.5.9-9.2ubuntu2                    amd64        Linux Key Management Utilities (library)
+ii  libkeyutils1:amd64         1.5.9-9.2ubuntu2.1                  amd64        Linux Key Management Utilities (library)
 ii  libkrb5-26-heimdal:amd64   7.5.0+dfsg-1                        amd64        Heimdal Kerberos - libraries
 ii  libkrb5-3:amd64            1.16-2ubuntu0.2                     amd64        MIT Kerberos runtime libraries
 ii  libkrb5support0:amd64      1.16-2ubuntu0.2                     amd64        MIT Kerberos runtime libraries - Support library
