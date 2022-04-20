@@ -1,5 +1,9 @@
 [
     {
+        "title": "USN-5380-1: Bash vulnerability",
+        "release": "unreleased"
+    },
+    {
         "title": "USN-5378-2: XZ Utils vulnerability",
         "release": "unreleased"
     },
