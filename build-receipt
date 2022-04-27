@@ -130,7 +130,7 @@ ii  libseccomp2:amd64          2.5.1-1ubuntu1~18.04.2              amd64        
 ii  libselinux1:amd64          2.7-2build2                         amd64        SELinux runtime shared libraries
 ii  libsemanage-common         2.7-2build2                         all          Common files for SELinux policy management libraries
 ii  libsemanage1:amd64         2.7-2build2                         amd64        SELinux policy management library
-ii  libsepol1:amd64            2.7-1                               amd64        SELinux library for manipulating binary security policies
+ii  libsepol1:amd64            2.7-1ubuntu0.1                      amd64        SELinux library for manipulating binary security policies
 ii  libsmartcols1:amd64        2.31.1-0.4ubuntu3.7                 amd64        smart column output alignment library
 ii  libsqlite3-0:amd64         3.22.0-1ubuntu0.4                   amd64        SQLite 3 shared library
 ii  libss2:amd64               1.44.1-1ubuntu1.3                   amd64        command-line interface parsing library
