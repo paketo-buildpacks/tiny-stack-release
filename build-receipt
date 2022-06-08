@@ -14,7 +14,7 @@ ii  binutils-x86-64-linux-gnu  2.30-21ubuntu1~18.04.7              amd64        
 ii  bsdutils                   1:2.31.1-0.4ubuntu3.7               amd64        basic utilities from 4.4BSD-Lite
 ii  build-essential            12.4ubuntu1                         amd64        Informational list of build-essential packages
 ii  bzip2                      1.0.6-8.1ubuntu0.2                  amd64        high-quality block-sorting file compressor - utilities
-ii  ca-certificates            20210119~18.04.2                    all          Common CA certificates
+ii  ca-certificates            20211016~18.04.1                    all          Common CA certificates
 ii  coreutils                  8.28-1ubuntu1                       amd64        GNU core utilities
 ii  cpp                        4:7.4.0-1ubuntu2.3                  amd64        GNU C preprocessor (cpp)
 ii  cpp-7                      7.5.0-3ubuntu1~18.04                amd64        GNU C preprocessor
